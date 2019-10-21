@@ -9,6 +9,7 @@ from torch import nn
 
 
 
+
 def get_senet154_pretrained_model(num_classes):
     pretrained_senet154 = senet154()
     pretrained_senet154.avg_pool = nn.AdaptiveAvgPool2d((1,1))
