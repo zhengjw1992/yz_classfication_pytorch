@@ -34,7 +34,6 @@ def run_cv(opt):
         print('训练集中各个类别的数据量为: ',train_label_num_dict)
         print('验证集中各个类别的数据量为: ',val_label_num_dict)
 
-
         # 定义数据增强操作
         augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop)
 
