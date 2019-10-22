@@ -40,6 +40,32 @@ def run(opt):
     train.train(net,train_loader,test_loader,opt)
 
 
+# 进行交叉验证的训练
+def run_cv():
+    # 读取数据，读取成MyDataset类可以处理的格式
+    train_filename_list,train_label_list = data_preprocess.read_data(train_directory=opt.train_directory,dir2label_dict=opt.dir2label_dict)
+    # 定义一个数据增强的操作
+    augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop)
+    # 使用MyDataset类和DataLoader类加载数据集
+    train_dataset = MyDataset(filenames=train_filename_list, labels=train_label_list,transform=augmentation)
+    train_loader = torch.utils.data.DataLoader(train_dataset,
+                                               batch_size=opt.batch_size, shuffle=True,
+                                               pin_memory=True)
+
+    # 同样的方式 加载验证数据集
+    test_filename_list,test_label_list = data_preprocess.read_data(train_directory=opt.test_directory,dir2label_dict=opt.dir2label_dict)
+    test_dataset = MyDataset(filenames=test_filename_list, labels=test_label_list,transform=augmentation)
+    test_loader = torch.utils.data.DataLoader(test_dataset,
+                                              batch_size=opt.batch_size, shuffle=True,
+                                              pin_memory=True)
+
+    # 定义一个网络
+    net = get_pretrain_model(opt.model_name,opt.num_classes)
+
+    # 训练集上训练、测试集上测试效果
+    train.train(net,train_loader,test_loader,opt)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,

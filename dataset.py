@@ -38,3 +38,19 @@ class MyDataset(Dataset):
         image = Image.open(self.filenames[idx]).resize((224,224)).convert('RGB')
         image = self.transform(image)
         return image, self.labels[idx]
+
+
+
+class MyDataset_v2(Dataset):
+    def __init__(self, filenames, labels, transform):
+        self.filenames = filenames
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.filenames)
+
+    def __getitem__(self, idx):
+        image = Image.open(self.filenames[idx]).resize((224,224)).convert('RGB')
+        image = self.transform(image)
+        return image, self.labels[idx]
