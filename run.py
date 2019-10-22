@@ -16,31 +16,6 @@ import datetime
 from sklearn.model_selection import StratifiedKFold
 import tool
 
-# # 入口方法
-# def run(opt):
-#     # 读取数据，读取成MyDataset类可以处理的格式
-#     train_filename_list,train_label_list = data_preprocess.read_data(directory=opt.train_directory,dir2label_dict=opt.dir2label_dict)
-#     # 定义一个数据增强的操作
-#     augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop)
-#     # 使用MyDataset类和DataLoader类加载数据集
-#     train_dataset = MyDataset(filenames=train_filename_list, labels=train_label_list,transform=augmentation)
-#     train_loader = torch.utils.data.DataLoader(train_dataset,
-#                                                batch_size=opt.batch_size, shuffle=True,
-#                                                pin_memory=True)
-#
-#     # 同样的方式 加载验证数据集
-#     test_filename_list,test_label_list = data_preprocess.read_data(directory=opt.test_directory,dir2label_dict=opt.dir2label_dict)
-#     test_dataset = MyDataset(filenames=test_filename_list, labels=test_label_list,transform=augmentation)
-#     test_loader = torch.utils.data.DataLoader(test_dataset,
-#                                                 batch_size=opt.batch_size, shuffle=True,
-#                                                 pin_memory=True)
-#
-#     # 定义一个网络
-#     net = get_pretrain_model(opt.model_name,opt.num_classes)
-#
-#     # 训练集上训练、测试集上测试效果
-#     train.train(net,train_loader,test_loader,opt)
-
 
 # 入口方法，可以进行交叉验证的训练
 def run_cv(opt):
@@ -118,5 +93,4 @@ if __name__ == '__main__':
     print(opt)
     # print(opt.model_save_path)
     # print(opt.dir2label_dict)
-
     run_cv(opt)
