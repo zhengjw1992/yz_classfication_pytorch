@@ -13,7 +13,7 @@ import os
 
 
 
-def train(net,train_loader,test_loader,opt):
+def train(net,split,train_loader,test_loader,opt):
     if opt.use_gpu:
         # 设置在第一块显卡上运行
         os.environ['CUDA_VISIBLE_DEVICES'] = opt.cuda_id
@@ -122,15 +122,15 @@ def train(net,train_loader,test_loader,opt):
         eval_losses.append(eval_loss / len(test_loader))
         eval_acces.append(eval_acc / len(test_loader))
 
-        print('Epoch {} Train Loss {} Train  Accuracy {} Teat Loss {} Test Accuracy {}'.format(
+        print('Split {} Epoch {} Train Loss {} Train  Accuracy {} Teat Loss {} Test Accuracy {}'.format(split,
             epoch+1, train_loss / len(train_loader),train_acc / len(train_loader), eval_loss / len(test_loader), eval_acc / len(test_loader)))
 
         # 写入日志
-        log_out.write('Epoch {} Train Loss {} Train  Accuracy {} Teat Loss {} Test Accuracy {}'.format(
+        log_out.write('Split {} Epoch {} Train Loss {} Train  Accuracy {} Teat Loss {} Test Accuracy {}'.format(split,
             epoch + 1, train_loss / len(train_loader), train_acc / len(train_loader),
             eval_loss / len(test_loader), eval_acc / len(test_loader))+'\n')
         if eval_acc / len(test_loader)> best_eval_acc:
-            torch.save(net.state_dict(), opt.model_save_path+'/model_{}_ep{}.pth'.format(opt.model_name,epoch + 1))
+            torch.save(net.state_dict(), opt.model_save_path+'/model_{}_split{}_ep{}.pth'.format(opt.model_name,split,epoch + 1))
             best_eval_acc = eval_acc / len(test_loader)
     print('训练结束\n')
     print('eval_losses is: ',eval_losses)
