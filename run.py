@@ -47,7 +47,7 @@ def run_cv(opt):
     # 读取读片，和之前不同的是，这里的训练集和验证集（测试集）在一个文件夹中，后面适用kfold随机划分训练集和验证集（测试集）
     filename_list,label_list = data_preprocess.read_data(directory=opt.train_directory,dir2label_dict=opt.dir2label_dict)
     # 分层抽样
-    skfold = StratifiedKFold(n_splits=5,random_state=0,shuffle=False)
+    skfold = StratifiedKFold(n_splits=opt.cv_num,random_state=0,shuffle=False)
     for split, (train_index_list, val_index_list) in enumerate(skfold.split(label_list,label_list)):
         print('**********Split %d**********'%split)
         print('经过分层抽样后，训练集中的数据量为：{0}，验证集中的数据量为{1}。'.format (len(train_index_list),len(val_index_list)))
@@ -95,11 +95,11 @@ if __name__ == '__main__':
     #                                                           '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='')
 
     parser.add_argument("--dir2label_dict",type=dict,default={'有积雪':1,'无积雪':0},help='')
-
     parser.add_argument("--model_name",type=str,default='senet154',help='network used during the training process')
     parser.add_argument("--epochs", type=int, default=20, help="number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("--cv_num", type=int, default=5, help="cross validation")
     parser.add_argument("--train_directory", type=str, default='data/train_image', help="path of training data")
     # parser.add_argument("--test_directory", type=str, default='data/validation_image', help="path of testing data")
     parser.add_argument("--use_gpu", type=bool, default=True, help="weather to use gpu")
