@@ -22,13 +22,19 @@ def read_data(directory,dir2label_dict):
 
 
 # 数据增强操作
-def data_augmentation(img_resize,img_random_crop):
-    augmentation = torchvision.transforms.Compose([torchvision.transforms.Resize(img_resize),
-                                                         torchvision.transforms.RandomCrop(img_random_crop),
-                                                         torchvision.transforms.RandomHorizontalFlip(),
-                                                         torchvision.transforms.ToTensor(),
-                                                         torchvision.transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
-                                                         ])
-    # augmentation = torchvision.transforms.Compose([torchvision.transforms.Resize(224),torchvision.transforms.ToTensor(),torchvision.transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])])
-    return augmentation
+def data_augmentation(img_resize,img_random_crop,mode):
+    if mode=='train':
+        augmentation = torchvision.transforms.Compose([torchvision.transforms.Resize(img_resize),
+                                                             torchvision.transforms.RandomCrop(img_random_crop),
+                                                             torchvision.transforms.RandomHorizontalFlip(),
+                                                             torchvision.transforms.ToTensor(),
+                                                             torchvision.transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
+                                                             ])
+        return augmentation
+    elif mode=='predict':
+        augmentation = torchvision.transforms.Compose([torchvision.transforms.Resize(img_resize),torchvision.transforms.ToTensor(),torchvision.transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])])
+        return augmentation
+    else:
+        print('data_augmentation()的mode参数设置有误。')
+
 

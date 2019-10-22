@@ -35,7 +35,7 @@ def run_cv(opt):
         print('验证集中各个类别的数据量为: ',val_label_num_dict)
 
         # 定义数据增强操作
-        augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop)
+        augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop,mode='train')
 
         # 根据分层抽样得到的数据index下标来获取训练集
         train_filename_list = tool.get_index_value(value_list=filename_list,index_list=train_index_list)
