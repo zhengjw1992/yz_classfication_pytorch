@@ -65,12 +65,12 @@ def run_cv(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
-    #                                                           '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='')
+    parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
+                                                              '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='')
 
-    parser.add_argument("--dir2label_dict",type=dict,default={'有积雪':1,'无积雪':0},help='')
+    # parser.add_argument("--dir2label_dict",type=dict,default={'有积雪':1,'无积雪':0},help='')
     parser.add_argument("--model_name",type=str,default='senet154',help='network used during the training process')
-    parser.add_argument("--epochs", type=int, default=20, help="number of epochs")
+    parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
     parser.add_argument("--cv_num", type=int, default=5, help="cross validation")
