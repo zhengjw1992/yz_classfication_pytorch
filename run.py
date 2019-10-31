@@ -22,7 +22,7 @@ def run_cv(opt):
     # 读取读片，和之前不同的是，这里的训练集和验证集（测试集）在一个文件夹中，后面适用kfold随机划分训练集和验证集（测试集）
     filename_list,label_list = data_preprocess.read_data(directory=opt.train_directory,dir2label_dict=opt.dir2label_dict)
     # 分层抽样
-    skfold = StratifiedKFold(n_splits=opt.cv_num,random_state=0,shuffle=False)
+    skfold = StratifiedKFold(n_splits=opt.cv_num,shuffle=False) # random_state=0 会使得每次run_cv()的训练集和测试集分割都一样
     for split, (train_index_list, val_index_list) in enumerate(skfold.split(label_list,label_list)):
         print('**********Split %d**********'%split)
         print('经过分层抽样后，训练集中的数据量为：{0}，验证集中的数据量为{1}。'.format (len(train_index_list),len(val_index_list)))
@@ -75,10 +75,9 @@ if __name__ == '__main__':
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
     parser.add_argument("--cv_num", type=int, default=5, help="cross validation")
     parser.add_argument("--train_directory", type=str, default='data/train_image', help="path of training data")
-    # parser.add_argument("--test_directory", type=str, default='data/validation_image', help="path of testing data")
     parser.add_argument("--use_gpu", type=bool, default=True, help="weather to use gpu")
     parser.add_argument("--cuda_id", type=str, default='0', help="which cuda used to run the code")
-    parser.add_argument("--img_resize", type=int, default=399, help="size of each image dimension")
+    parser.add_argument("--img_resize", type=int, default=369, help="size of each image dimension") # 369
     parser.add_argument("--img_random_crop", type=int, default=336, help="size of each image dimension")
     opt = parser.parse_args()
     # print(opt)

@@ -12,14 +12,14 @@ from torch.utils.data import TensorDataset, DataLoader, Dataset
 
 import argparse
 # tta
-from ttach.aliases import five_crop_transform
+import ttach as tta
 from ttach import aliases
 from ttach.base import Compose
 
 
 #  加载模型
-def load_model(moedl_name,model_path,num_classes):
-    model = get_pretrain_model(moedl_name,num_classes)
+def load_model(model_name,model_path,num_classes):
+    model = get_pretrain_model(model_name,num_classes)
     model.load_state_dict(torch.load(model_path,map_location='cpu'))
     print(model)
     return model
@@ -44,6 +44,7 @@ def read_filename_list(directory):
 
 def run(net,opt):
     if opt.use_gpu:
+        os.environ['CUDA_VISIBLE_DEVICES'] = opt.cuda_id
         device = torch.device('cuda')
         net.to(device)
     filename_list,label_list = read_filename_list(opt.test_directory)
@@ -52,7 +53,7 @@ def run(net,opt):
 
     test_dataset = dataset.MyDataset(filename_list, label_list, augmentation)
     test_loader = torch.utils.data.DataLoader(test_dataset,
-                                               batch_size=4, shuffle=False,
+                                               batch_size=opt.batch_size, shuffle=False,
                                                pin_memory=True)
     data_out = open('out.csv','w',encoding='utf8')
     count = 0
@@ -87,15 +88,14 @@ def predict(net, input, mode):
         out = defined_tta(net,input)
         return out
 
+
 def save_res(data_out,filename,pred):
     for i in range(0,len(filename)):
-        data_out.write(filename[i]+','+str(pred.numpy()[i]+1)+'\n')
+        data_out.write(filename[i]+','+str(pred.numpy()[i]+1)+'\n')  # 不应该加1，应该去掉
+
 
 
 # tta
-import ttach as tta
-
-
 def defined_tta(net,input):
     pass
 # 下面的代码不要删掉，后面修改成自定义的tta
@@ -151,9 +151,11 @@ if __name__ == '__main__':
     parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
                                                               '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='network used during the training process')
     parser.add_argument("--use_gpu", type=bool, default=False, help="weather to use gpu")
-    parser.add_argument("--img_resize", type=int, default=399, help="size of each image dimension")
+    parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
+    parser.add_argument("--img_resize", type=int, default=369, help="size of each image dimension")
     parser.add_argument("--img_random_crop", type=int, default=336, help="size of each image dimension")
     parser.add_argument("--predict_mode", type=str, default='pre_defined_tta', help="test time augmentation")
+    parser.add_argument("--cuda_id", type=str, default='0', help="which cuda used to run the code")
     opt = parser.parse_args()
     parser.add_argument("--num_classes", type=int, default=len(opt.dir2label_dict), help="number of class")
     opt = parser.parse_args()
