@@ -25,7 +25,7 @@ def run_cv(opt):
     skfold = StratifiedKFold(n_splits=opt.cv_num,shuffle=False) # random_state=0 会使得每次run_cv()的训练集和测试集分割都一样
     for split, (train_index_list, val_index_list) in enumerate(skfold.split(label_list,label_list)):
         print('**********Split %d**********'%split)
-        print('经过分层抽样后，训练集中的数据量为：{0}，验证集中的数据量为{1}。'.format (len(train_index_list),len(val_index_list)))
+        print('经过分层抽样后，训练集中的数据量为：{0}，验证集中的数据量为{1}。'.format(len(train_index_list),len(val_index_list)))
         train_label_num_dict = tool.count_class_num(label_list,train_index_list)
         val_label_num_dict = tool.count_class_num(label_list,val_index_list)
 
@@ -62,6 +62,38 @@ def run_cv(opt):
         train.train(net,split,train_loader,val_loader,opt)
 
 
+# 入口方法，不使用交叉验证，指定训练集和测试集
+def run(opt):
+    # 读取训练集
+    train_filename_list,train_label_list = data_preprocess.read_data(directory=opt.train_directory,dir2label_dict=opt.dir2label_dict)
+    # 定义数据增强操作
+    augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop,mode='train')
+    train_dataset = MyDataset(filenames=train_filename_list, labels=train_label_list, transform=augmentation)
+    train_loader = torch.utils.data.DataLoader(train_dataset,
+                                               batch_size=opt.batch_size, shuffle=True,
+                                               pin_memory=True)
+
+    # 读取测试集
+    test_filename_list,test_label_list = data_preprocess.read_data(directory=opt.test_directory,dir2label_dict=opt.dir2label_dict)
+    # 定义数据增强操作
+    test_dataset = MyDataset(filenames=test_filename_list, labels=test_label_list, transform=augmentation)
+    test_loader = torch.utils.data.DataLoader(test_dataset,
+                                               batch_size=opt.batch_size, shuffle=True,
+                                               pin_memory=True)
+
+
+
+    # val_dataset = MyDataset(filenames=val_filename_list, labels=val_label_list, transform=augmentation)
+    # val_loader = torch.utils.data.DataLoader(val_dataset,
+    #                                          batch_size=opt.batch_size, shuffle=True,
+    #                                          pin_memory=True)
+
+    # 定义一个网络
+    net = get_pretrain_model(opt.model_name,opt.num_classes)
+
+    # 训练集上训练、测试集上测试效果,没有使用cv，将split设置为0
+    train.train(net,0,train_loader,test_loader,opt)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
@@ -72,8 +104,10 @@ if __name__ == '__main__':
     parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
-    parser.add_argument("--cv_num", type=int, default=5, help="cross validation")
+    parser.add_argument("--use_cv", type=bool, default=False, help="weather to use cross validation")
+    parser.add_argument("--cv_num", type=int, default=5, help="numbers of cross validation")
     parser.add_argument("--train_directory", type=str, default='data/train_image', help="path of training data")
+    parser.add_argument("--test_directory", type=str, default='data/test_image', help="path of testing data")
     parser.add_argument("--use_gpu", type=bool, default=True, help="weather to use gpu")
     parser.add_argument("--cuda_id", type=str, default='0', help="which cuda used to run the code")
     parser.add_argument("--img_resize", type=int, default=369, help="size of each image dimension") # 369
@@ -90,4 +124,7 @@ if __name__ == '__main__':
     print(opt)
     # print(opt.model_save_path)
     # print(opt.dir2label_dict)
-    run_cv(opt)
+    if opt.use_cv:
+        run_cv(opt)
+    else:
+        run(opt)
