@@ -16,7 +16,8 @@ import datetime
 from sklearn.model_selection import StratifiedKFold
 import tool
 
-
+#
+from batch_sampler import BatchSampler,RandomSampler,SequentialSampler
 # 入口方法，可以进行交叉验证的训练
 def run_cv(opt):
     # 读取读片，和之前不同的是，这里的训练集和验证集（测试集）在一个文件夹中，后面适用kfold随机划分训练集和验证集（测试集）
@@ -69,17 +70,35 @@ def run(opt):
     # 定义数据增强操作
     augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop,mode='train')
     train_dataset = MyDataset(filenames=train_filename_list, labels=train_label_list, transform=augmentation)
+    # train_loader = torch.utils.data.DataLoader(train_dataset,
+    #                                            batch_size=opt.batch_size, shuffle=True,
+    #                                            pin_memory=True)
+    # 改成下面这种multi-scale 主要是自定义了batch_sample
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=opt.batch_size, shuffle=True,
-                                               pin_memory=True)
+                                               pin_memory=True,
+                                               batch_sampler= BatchSampler(RandomSampler(train_dataset),
+                                                                           batch_size=64,
+                                                                           drop_last=True,
+                                                                           multiscale_step=1,
+                                                                           img_sizes=list(range(320, 608 + 1, 32))))
 
     # 读取测试集
     test_filename_list,test_label_list = data_preprocess.read_data(directory=opt.test_directory,dir2label_dict=opt.dir2label_dict)
     # 定义数据增强操作
     test_dataset = MyDataset(filenames=test_filename_list, labels=test_label_list, transform=augmentation)
+    # test_loader = torch.utils.data.DataLoader(test_dataset,
+    #                                            batch_size=opt.batch_size, shuffle=True,
+    #                                            pin_memory=True)
+    # 改成下面这种multi-scale 主要是自定义了batch_sample
     test_loader = torch.utils.data.DataLoader(test_dataset,
-                                               batch_size=opt.batch_size, shuffle=True,
-                                               pin_memory=True)
+                                              batch_size=opt.batch_size, shuffle=True,
+                                              pin_memory=True,
+                                              batch_sampler= BatchSampler(RandomSampler(test_dataset),
+                                                                          batch_size=64,
+                                                                          drop_last=True,
+                                                                          multiscale_step=1,
+                                                                          img_sizes=list(range(320, 608 + 1, 32))))
 
 
 
@@ -95,21 +114,53 @@ def run(opt):
     train.train(net,0,train_loader,test_loader,opt)
 
 if __name__ == '__main__':
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
+    #                                                           '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='directory to label')
+    #
+    # # parser.add_argument("--dir2label_dict",type=dict,default={'有积雪':1,'无积雪':0},help='')
+    # parser.add_argument("--model_name",type=str,default='senet154',help='network used during the training process')
+    # parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
+    # parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
+    # parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
+    # parser.add_argument("--use_cv", type=bool, default=False, help="weather to use cross validation")
+    # parser.add_argument("--cv_num", type=int, default=5, help="numbers of cross validation")
+    # parser.add_argument("--train_directory", type=str, default='data/train_image', help="path of training data")
+    # parser.add_argument("--test_directory", type=str, default='data/test_image', help="path of testing data")
+    # parser.add_argument("--use_gpu", type=bool, default=True, help="weather to use gpu")
+    # parser.add_argument("--cuda_id", type=str, default='0', help="which cuda used to run the code")
+    # parser.add_argument("--img_resize", type=int, default=369, help="size of each image dimension") # 369
+    # parser.add_argument("--img_random_crop", type=int, default=336, help="size of each image dimension")
+    # opt = parser.parse_args()
+    # # print(opt)
+    # # print(opt.model_name)
+    # now_datetime = datetime.datetime.now()
+    # model_time = str(now_datetime)[0:10]+'_'+str(now_datetime)[11:19]
+    # parser.add_argument("--model_save_path", type=str, default='output/'+opt.model_name+'_'+model_time+'/model_save_dir', help="save path of training model")
+    # parser.add_argument("--log_save_path", type=str, default='output/'+opt.model_name+'_'+model_time+'/model_save_dir', help="save path of training log")
+    # parser.add_argument("--num_classes", type=int, default=len(opt.dir2label_dict), help="number of class")
+    # opt = parser.parse_args()
+    # print(opt)
+    # # print(opt.model_save_path)
+    # # print(opt.dir2label_dict)
+    # if opt.use_cv:
+    #     run_cv(opt)
+    # else:
+    #     run(opt)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,
-                                                              '20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='directory to label')
-
+    #parser.add_argument("--dir2label_dict",type=dict,default={'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8,'10':9,'11':10,'12':11,'13':12,'14':13,'15':14,'16':15,'17':16,'18':17,'19':18,'20':19,'21':20,'22':21,'23':22,'24':23,'25':24,'26':25,'27':26,'28':27,'29':28},help='')
+    parser.add_argument("--dir2label_dict",type=dict,default={'label0_0-50m':0,'label1_50-100m':1,'label2_100-200m':2,'label3_200-500m':3,'label4_500-1000m':4,'label5_1000-9999m':5},help='')
     # parser.add_argument("--dir2label_dict",type=dict,default={'有积雪':1,'无积雪':0},help='')
     parser.add_argument("--model_name",type=str,default='senet154',help='network used during the training process')
     parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="size of each image batch")
     parser.add_argument("--learning_rate", type=float, default=1e-4, help="learning rate")
-    parser.add_argument("--use_cv", type=bool, default=False, help="weather to use cross validation")
-    parser.add_argument("--cv_num", type=int, default=5, help="numbers of cross validation")
-    parser.add_argument("--train_directory", type=str, default='data/train_image', help="path of training data")
-    parser.add_argument("--test_directory", type=str, default='data/test_image', help="path of testing data")
+    parser.add_argument("--cv_num", type=int, default=3, help="cross validation")
+    parser.add_argument("--train_directory", type=str, default='/home/test/jysoft/model/jwzheng/fog_recognition_keras/fog_data/train/', help="path of training data")
+    parser.add_argument("--test_directory", type=str, default='/home/test/jysoft/model/jwzheng/fog_recognition_keras/fog_data/valid/', help="path of testing data")
     parser.add_argument("--use_gpu", type=bool, default=True, help="weather to use gpu")
-    parser.add_argument("--cuda_id", type=str, default='0', help="which cuda used to run the code")
+    parser.add_argument("--is_cv", type=bool, default=False, help="weather to use cross validation")
+    parser.add_argument("--cuda_id", type=str, default='3', help="which cuda used to run the code")
     parser.add_argument("--img_resize", type=int, default=369, help="size of each image dimension") # 369
     parser.add_argument("--img_random_crop", type=int, default=336, help="size of each image dimension")
     opt = parser.parse_args()
@@ -124,7 +175,7 @@ if __name__ == '__main__':
     print(opt)
     # print(opt.model_save_path)
     # print(opt.dir2label_dict)
-    if opt.use_cv:
+    if opt.is_cv:
         run_cv(opt)
     else:
         run(opt)
