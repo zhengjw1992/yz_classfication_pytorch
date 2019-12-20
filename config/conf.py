@@ -3,6 +3,7 @@
 # @Function：模型训练的配置参数类
 
 
+
 # # 参数类
 # class conf(object):
 #     # 文件夹和真实标签的映射表
