@@ -70,35 +70,35 @@ def run(opt):
     # 定义数据增强操作
     augmentation = data_preprocess.data_augmentation(opt.img_resize,opt.img_random_crop,mode='train')
     train_dataset = MyDataset(filenames=train_filename_list, labels=train_label_list, transform=augmentation)
-    # train_loader = torch.utils.data.DataLoader(train_dataset,
-    #                                            batch_size=opt.batch_size, shuffle=True,
-    #                                            pin_memory=True)
-    # 改成下面这种multi-scale 主要是自定义了batch_sample
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size=opt.batch_size, shuffle=True,
-                                               pin_memory=True,
-                                               batch_sampler= BatchSampler(RandomSampler(train_dataset),
-                                                                           batch_size=64,
-                                                                           drop_last=True,
-                                                                           multiscale_step=1,
-                                                                           img_sizes=list(range(320, 608 + 1, 32))))
+                                               pin_memory=True)
+    # # 改成下面这种multi-scale 主要是自定义了batch_sample
+    # train_loader = torch.utils.data.DataLoader(train_dataset,
+    #                                            batch_size=opt.batch_size, shuffle=True,
+    #                                            pin_memory=True,
+    #                                            batch_sampler= BatchSampler(RandomSampler(train_dataset),
+    #                                                                        batch_size=64,
+    #                                                                        drop_last=True,
+    #                                                                        multiscale_step=1,
+    #                                                                        img_sizes=list(range(320, 608 + 1, 32))))
 
     # 读取测试集
     test_filename_list,test_label_list = data_preprocess.read_data(directory=opt.test_directory,dir2label_dict=opt.dir2label_dict)
     # 定义数据增强操作
     test_dataset = MyDataset(filenames=test_filename_list, labels=test_label_list, transform=augmentation)
-    # test_loader = torch.utils.data.DataLoader(test_dataset,
-    #                                            batch_size=opt.batch_size, shuffle=True,
-    #                                            pin_memory=True)
-    # 改成下面这种multi-scale 主要是自定义了batch_sample
     test_loader = torch.utils.data.DataLoader(test_dataset,
-                                              batch_size=opt.batch_size, shuffle=True,
-                                              pin_memory=True,
-                                              batch_sampler= BatchSampler(RandomSampler(test_dataset),
-                                                                          batch_size=64,
-                                                                          drop_last=True,
-                                                                          multiscale_step=1,
-                                                                          img_sizes=list(range(320, 608 + 1, 32))))
+                                               batch_size=opt.batch_size, shuffle=True,
+                                               pin_memory=True)
+    # 改成下面这种multi-scale 主要是自定义了batch_sample
+    # test_loader = torch.utils.data.DataLoader(test_dataset,
+    #                                           batch_size=opt.batch_size, shuffle=True,
+    #                                           pin_memory=True,
+    #                                           batch_sampler= BatchSampler(RandomSampler(test_dataset),
+    #                                                                       batch_size=64,
+    #                                                                       drop_last=True,
+    #                                                                       multiscale_step=1,
+    #                                                                       img_sizes=list(range(320, 608 + 1, 32))))
 
 
 
